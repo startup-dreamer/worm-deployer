@@ -1,0 +1,16 @@
+# Foundry
+cache/
+out/
+
+# JS
+node_modules/
+*.lockb
+package-lock.json/
+.env
+
+#Hardhat files
+cache_hardhat/
+artifacts/
+
+#Hardhat plugin files
+typechain-types/
