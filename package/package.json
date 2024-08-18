@@ -1,0 +1,35 @@
+{
+  "name": "worm-deployer",
+  "version": "0.0.1",
+  "description": "A wormhole multichain deployer tool",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/startup-dreamer/worm-launcher.git"
+  },
+  "bin": "./app.js",
+  "keywords": [
+    "wormhole",
+    "multichain",
+    "crosschain"
+  ],
+  "author": "krieger",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/startup-dreamer/worm-launcher/issues"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "cli-spinners": "^2.9.0",
+    "inquirer": "^9.2.10",
+    "ora": "^7.0.1",
+    "solc": "0.8.18",
+    "web3.storage": "^4.5.5"
+  },
+  "homepage": "https://github.com/startup-dreamer/worm-launcher#readme",
+  "shell": "/bin/bash"
+}
