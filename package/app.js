@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 
-import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
-import getFiles from "./files.js";
 import inquirer from "inquirer";
 import cliSpinners from "cli-spinners";
-import ora from "ora";
-import { log } from "console";
-import { ethers } from "ethers";
-import { getWormholeConfig, WormDeployerConfig, Create2DeployerConfig } from "./config.js";
-import { type } from "os";
 import chalk from 'chalk';
+import ora from "ora";
 import dotenv from 'dotenv';
+import { log } from "console";
+import { exec } from "child_process";
+import { ethers } from "ethers";
+import getFiles from "./files.js";
+import { getWormholeConfig, WormDeployerConfig } from "./config.js";
 
 async function main() {
   try {
@@ -193,21 +192,6 @@ async function getDeploymentDetails(deploymentType) {
     destinationChains = destinations;
   }
 
-  const { saltInputInput } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'saltInputInput',
-      message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
-      validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
-    },
-  ]);
-
-  log(chalk.cyan(`Type of saltInputInput: ${typeof saltInputInput}`));
-
-  saltInput = stringToBytes(saltInputInput, 32);
-
-  log(chalk.cyan(saltInput));
-
   const { hasEnvFile } = await inquirer.prompt([
     {
       type: 'confirm',
@@ -215,11 +199,17 @@ async function getDeploymentDetails(deploymentType) {
       message: chalk.cyan('Is there a .env file present in the project directory?'),
     },
   ]);
-
+  let spinner;
   if (hasEnvFile) {
+    spinner = ora({
+      text: chalk.yellow("Fetching details from .env file"),
+      spinner: cliSpinners.circle,
+    }).start();
+
     dotenv.config();
     privateKey = process.env.DEPLOYMENT_PRIVATE_KEY || process.env.PRIVATE_KEY;
     if (!privateKey) {
+      spinner.stop();
       console.log(chalk.yellow('No private key found in .env file. Please enter it manually.'));
       const { key } = await inquirer.prompt([
         {
@@ -229,6 +219,8 @@ async function getDeploymentDetails(deploymentType) {
         },
       ]);
       privateKey = key;
+    } else {
+      spinner.succeed(chalk.green('Private key found in .env file'));
     }
   } else {
     const { key } = await inquirer.prompt([
@@ -240,6 +232,17 @@ async function getDeploymentDetails(deploymentType) {
     ]);
     privateKey = key;
   }
+
+  const { saltInputInput } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'saltInputInput',
+      message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
+      validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
+    },
+  ]);
+
+  saltInput = stringToBytes(saltInputInput, 32);
 
   return { sourceChain, destinationChains, saltInput, privateKey };
 }
@@ -277,7 +280,7 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
 
     // Get deployment cost
     const cost = await WormholeDeployer.getCost(targetChains);
-    console.log(chalk.yellow("Estimated cost:"), chalk.green(ethers.utils.formatEther(cost)), "ETH");
+    console.log(chalk.yellow("Estimated cost:"), chalk.red(ethers.utils.formatEther(cost)), chalk.red("ETH"));
 
     if (balance.lt(cost)) {
       throw new Error(chalk.red("Insufficient funds for deployment"));
@@ -285,7 +288,30 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
 
     // Compute deployment address
     const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, bytecode);
-    console.log(chalk.blue("Computed deployment address:"), chalk.green(deploymentAddress));
+    console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
+
+    // Ask if contract has constructor arguments
+    const { hasConstructorArgs } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'hasConstructorArgs',
+        message: chalk.cyan('Does the contract have constructor arguments?'),
+      },
+    ]);
+
+    let constructorArgs = "0x";
+    if (hasConstructorArgs) {
+      const { args } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'args',
+          message: chalk.cyan('Enter constructor arguments (space-separated):'),
+        },
+      ]);
+      const argArray = args.split(' ');
+      const abiCoder = new ethers.utils.AbiCoder();
+      constructorArgs = abiCoder.encode(argArray.map(() => 'string'), argArray);
+    }
 
     // Confirm deployment
     const { confirm } = await inquirer.prompt([
@@ -308,7 +334,7 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
       bytecode,
       saltInput,
       false, // initializable
-      "0x", // initializeData
+      constructorArgs, // initializeData
       { value: cost.mul(2) } // Send twice the estimated cost to ensure enough funds
     );
 
