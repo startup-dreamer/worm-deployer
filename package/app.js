@@ -9,29 +9,36 @@ import cliSpinners from "cli-spinners";
 import ora from "ora";
 import { log } from "console";
 import { ethers } from "ethers";
-// import getWormholeConfig from "./config.js";
+import { getWormholeConfig, WormDeployerConfig, Create2DeployerConfig } from "./config.js";
+import { type } from "os";
+import dotenv from 'dotenv';
 
 async function main() {
-  // Determine project type
-  const projectType = await determineProjectType();
+  try {
+    // Determine project type
+    const projectType = await determineProjectType();
 
-  // Get contract path
-  const contractPath = await getContractPath(projectType);
+    // Get contract path
+    const contractPath = await getContractPath(projectType);
 
-  // Compile contract
-  await compileContract(projectType);
+    // Compile contract
+    await compileContract(projectType);
 
-  // Get contract metadata
-  const { contract, jsonFile } = await getContractMetadata(projectType, contractPath);
+    // Get contract metadata
+    const { contract, jsonFile } = await getContractMetadata(projectType, contractPath);
 
-  // Determine deployment type
-  const deploymentType = await determineDeploymentType();
+    // Determine deployment type
+    const deploymentType = await determineDeploymentType();
 
-  // Get deployment details
-  const deploymentDetails = await getDeploymentDetails(deploymentType);
+    // Get deployment details
+    const deploymentDetails = await getDeploymentDetails(deploymentType);
 
-  // Deploy contract
-  await deployContract(contract, jsonFile, deploymentDetails);
+    // Deploy contract
+    await deployContract(contract, jsonFile, deploymentDetails);
+  } catch (error) {
+    console.error('Error in main execution:', error);
+    process.exit(1);
+  }
 }
 
 async function determineProjectType() {
@@ -96,7 +103,7 @@ async function getContractPath(projectType) {
 async function compileContract(projectType) {
   let spinner = ora({
     text: "Compiling contract",
-    spinner: cliSpinners.clock,
+    spinner: cliSpinners.arc,
   }).start();
 
   const command = projectType === 'hardhat' ? 'npx hardhat compile' : 'forge compile';
@@ -150,17 +157,26 @@ async function determineDeploymentType() {
 }
 
 async function getDeploymentDetails(deploymentType) {
+  const wormholeConfig = getWormholeConfig();
   let sourceChain, destinationChains, saltInput, privateKey;
 
   if (deploymentType === 'single') {
-    sourceChain = 'Ethereum'; // Default for single chain deployment
+    const { chain } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'chain',
+        message: 'Choose the deployment chain:',
+        choices: wormholeConfig.chains,
+      },
+    ]);
+    sourceChain = chain;
   } else {
     const { chain } = await inquirer.prompt([
       {
         type: 'list',
         name: 'chain',
         message: 'Choose the source chain (fees for deployment will be taken from here):',
-        choices: ['Ethereum', 'Arbitrum'],
+        choices: wormholeConfig.chains,
       },
     ]);
     sourceChain = chain;
@@ -170,7 +186,7 @@ async function getDeploymentDetails(deploymentType) {
         type: 'checkbox',
         name: 'destinations',
         message: 'Choose the destination chains:',
-        choices: ['Ethereum', 'Arbitrum'].filter(c => c !== sourceChain),
+        choices: wormholeConfig.chains.filter(c => c !== sourceChain),
       },
     ]);
     destinationChains = destinations;
@@ -184,51 +200,80 @@ async function getDeploymentDetails(deploymentType) {
       validate: input => !isNaN(input) && input !== '' || 'Please enter a valid number',
     },
   ]);
-  // saltInput = ethers.utils.hexZeroPad(ethers.BigNumber.from(saltInputInput).toHexString(), 32);
 
-  const { key } = await inquirer.prompt([
+  log(`Type of saltInputInput: ${typeof saltInputInput}`);
+
+  saltInput = stringToBytes(saltInputInput, 32);
+
+  log(saltInput)
+
+  const { hasEnvFile } = await inquirer.prompt([
     {
-      type: 'password',
-      name: 'key',
-      message: 'Enter your private key for gas fee payment:',
+      type: 'confirm',
+      name: 'hasEnvFile',
+      message: 'Is there a .env file present in the project directory?',
     },
   ]);
-  privateKey = key;
+
+  if (hasEnvFile) {
+    dotenv.config();
+    privateKey = process.env.DEPLOYMENT_PRIVATE_KEY || process.env.PRIVATE_KEY;
+    if (!privateKey) {
+      console.log('No private key found in .env file. Please enter it manually.');
+      const { key } = await inquirer.prompt([
+        {
+          type: 'password',
+          name: 'key',
+          message: 'Enter your private key for gas fee payment:',
+        },
+      ]);
+      privateKey = key;
+    }
+  } else {
+    const { key } = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'key',
+        message: 'Enter your private key for gas fee payment:',
+      },
+    ]);
+    privateKey = key;
+  }
 
   return { sourceChain, destinationChains, saltInput, privateKey };
 }
 
 async function deployContract(contract, jsonFile, deploymentDetails) {
   const { sourceChain, destinationChains, saltInput, privateKey } = deploymentDetails;
+  const wormholeConfig = getWormholeConfig();
   
   // Setup provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(`https://${sourceChain.toLowerCase()}.infura.io/v3/YOUR_INFURA_PROJECT_ID`);
-  const signer = new ethers.Wallet(privateKey, provider);
-
-  // Get deployer address and balance
-  const deployerAddress = await signer.getAddress();
-  const balance = await provider.getBalance(deployerAddress);
-  console.log(`Deployer address: ${deployerAddress}`);
-  console.log(`Account balance: ${ethers.utils.formatEther(balance)} ETH`);
-
-  // Setup WormholeDeployer contract
-  const WormholeDeployer = new ethers.Contract(
-    "0x83B805f716DEae9eB7021E0F611b6f7284c11D75",
-    ["function getCost(uint16[] memory targetChains) public view returns (uint256)", 
-     "function computeAddress(bytes32 saltInput, bytes memory bytecode) public view returns (address)", 
-     "function deployAcrossChains(uint16[] memory targetChains, address[] memory targetAddresses, bytes memory bytecode, bytes32 saltInput, bool initializable, bytes memory initializeData) public payable returns (address)"],
-    signer
-  );
-
-  // Parse contract bytecode from JSON
-  const parsedJson = JSON.parse(jsonFile);
-  const bytecode = ethers.utils.arrayify(parsedJson.bytecode);
-
-  // Prepare deployment parameters
-  const targetChains = destinationChains ? destinationChains.map(chain => chain === 'Ethereum' ? 1 : 42161) : [1]; // Use appropriate chain IDs
-  const targetAddresses = targetChains.map(() => "0x0000000000000000000000000000000000000000"); // Replace with actual addresses if needed
-
   try {
+    const provider = new ethers.providers.JsonRpcProvider(wormholeConfig.getRpcUrl(sourceChain));
+    const signer = new ethers.Wallet(privateKey, provider);
+
+    // Get deployer address and balance
+    const deployerAddress = await signer.getAddress();
+    const balance = await provider.getBalance(deployerAddress);
+    console.log(`Deployer address: ${deployerAddress}`);
+    console.log(`Source chain account balance: ${ethers.utils.formatEther(balance)} ${sourceChain} ETH`);
+
+    // Setup WormholeDeployer contract
+    const WormholeDeployer = new ethers.Contract(
+      WormDeployerConfig.address,
+      WormDeployerConfig.abi,
+      signer
+    );
+
+    // Parse contract bytecode from JSON
+    const parsedJson = JSON.parse(jsonFile);
+    const bytecodeString = parsedJson.bytecode;
+    const bytecode = ethers.utils.arrayify(bytecodeString.object);
+
+    // Prepare deployment parameters
+    const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
+    const targetAddresses = targetChains.map(() => "0x0000000000000000000000000000000000000000"); // Replace with actual addresses if needed
+
     // Get deployment cost
     const cost = await WormholeDeployer.getCost(targetChains);
     console.log("Estimated cost:", ethers.utils.formatEther(cost), "ETH");
@@ -266,12 +311,17 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
       { value: cost.mul(2) } // Send twice the estimated cost to ensure enough funds
     );
 
-    console.log("Transaction sent. Waiting for confirmation...");
+    console.log("Transaction sent.");
+    const spinner = ora({
+      text: "Waiting for transaction confirmation...",
+      spinner: cliSpinners.circle,
+    }).start();
     const receipt = await tx.wait();
-    console.log(`Deployment successful. Checkout transaction...`);
+    spinner.succeed('Transaction confirmed');
+    console.log(`Deployment successful. Checkout on wormholescan...`);
     console.log(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=MAINNET`);
   } catch (error) {
-    console.error('Deployment failed:', error.message);
+    console.error('Deployment failed:', error);
     if (error.transaction) {
       console.error('Transaction details:', error.transaction);
     }
@@ -282,3 +332,8 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+
+function stringToBytes(input, length) {
+  const bytes = ethers.utils.toUtf8Bytes(input);
+  return ethers.utils.concat([bytes, new Uint8Array(length - bytes.length)]);
+}
