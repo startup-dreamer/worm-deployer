@@ -11,6 +11,7 @@ import { log } from "console";
 import { ethers } from "ethers";
 import { getWormholeConfig, WormDeployerConfig, Create2DeployerConfig } from "./config.js";
 import { type } from "os";
+import chalk from 'chalk';
 import dotenv from 'dotenv';
 
 async function main() {
@@ -36,7 +37,7 @@ async function main() {
     // Deploy contract
     await deployContract(contract, jsonFile, deploymentDetails);
   } catch (error) {
-    console.error('Error in main execution:', error);
+    console.error(chalk.red('Error in main execution:'), error);
     process.exit(1);
   }
 }
@@ -50,22 +51,22 @@ async function determineProjectType() {
       {
         type: 'list',
         name: 'projectType',
-        message: 'Which project type are you using?',
+        message: chalk.cyan('Which project type are you using?'),
         choices: [
-          { name: '🦔 Hardhat', value: 'hardhat' },
-          { name: '🔨 Foundry', value: 'foundry' }
+          { name: chalk.magenta('🦔 Hardhat'), value: 'hardhat' },
+          { name: chalk.magenta('🔨 Foundry'), value: 'foundry' }
         ],
       },
     ]);
     return projectType;
   } else if (hasHardhatConfig) {
-    log('Found the Hardhat project');
+    log(chalk.blue('Found the Hardhat project'));
     return 'hardhat';
   } else if (hasFoundryToml) {
-    log('Found the Foundry project');
+    log(chalk.blue('Found the Foundry project'));
     return 'foundry';
   } else {
-    throw new Error('Neither Hardhat nor Foundry configuration found.');
+    throw new Error(chalk.red('Neither Hardhat nor Foundry configuration found.'));
   }
 }
 
@@ -76,7 +77,7 @@ async function getContractPath(projectType) {
   const solidityFiles = contractPaths.filter((file) => file.endsWith('.sol'));
 
   if (solidityFiles.length === 0) {
-    throw new Error('No Solidity contracts found.');
+    throw new Error(chalk.red('No Solidity contracts found.'));
   }
 
   if (solidityFiles.length === 1) {
@@ -84,7 +85,7 @@ async function getContractPath(projectType) {
   }
 
   const contractChoices = solidityFiles.map(file => ({
-    name: `📜 ${path.basename(file, '.sol')}`,
+    name: chalk.green(`📜 ${path.basename(file, '.sol')}`),
     value: file
   }));
 
@@ -92,7 +93,7 @@ async function getContractPath(projectType) {
     {
       type: 'list',
       name: 'contractPath',
-      message: 'Which contract do you want to deploy?',
+      message: chalk.cyan('Which contract do you want to deploy?'),
       choices: contractChoices,
     },
   ]);
@@ -102,7 +103,7 @@ async function getContractPath(projectType) {
 
 async function compileContract(projectType) {
   let spinner = ora({
-    text: "Compiling contract",
+    text: chalk.yellow("Compiling contract"),
     spinner: cliSpinners.arc,
   }).start();
 
@@ -110,10 +111,10 @@ async function compileContract(projectType) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        spinner.fail(`Compilation error: ${error}`);
+        spinner.fail(chalk.red(`Compilation error: ${error}`));
         reject(error);
       } else {
-        spinner.succeed('Compilation successful');
+        spinner.succeed(chalk.green('Compilation successful'));
         resolve();
       }
     });
@@ -146,10 +147,10 @@ async function determineDeploymentType() {
     {
       type: 'list',
       name: 'deploymentType',
-      message: 'Is this a single chain or multi chain deployment?',
+      message: chalk.cyan('Is this a single chain or multi chain deployment?'),
       choices: [
-        { name: 'Single Chain', value: 'single' },
-        { name: 'Multi Chain', value: 'multi' }
+        { name: chalk.green('Single Chain'), value: 'single' },
+        { name: chalk.green('Multi Chain'), value: 'multi' }
       ],
     },
   ]);
@@ -165,8 +166,8 @@ async function getDeploymentDetails(deploymentType) {
       {
         type: 'list',
         name: 'chain',
-        message: 'Choose the deployment chain:',
-        choices: wormholeConfig.chains,
+        message: chalk.cyan('Choose the deployment chain:'),
+        choices: wormholeConfig.chains.map(chain => ({ name: chalk.yellow(chain), value: chain })),
       },
     ]);
     sourceChain = chain;
@@ -175,8 +176,8 @@ async function getDeploymentDetails(deploymentType) {
       {
         type: 'list',
         name: 'chain',
-        message: 'Choose the source chain (fees for deployment will be taken from here):',
-        choices: wormholeConfig.chains,
+        message: chalk.cyan('Choose the source chain (fees for deployment will be taken from here):'),
+        choices: wormholeConfig.chains.map(chain => ({ name: chalk.yellow(chain), value: chain })),
       },
     ]);
     sourceChain = chain;
@@ -185,8 +186,8 @@ async function getDeploymentDetails(deploymentType) {
       {
         type: 'checkbox',
         name: 'destinations',
-        message: 'Choose the destination chains:',
-        choices: wormholeConfig.chains.filter(c => c !== sourceChain),
+        message: chalk.cyan('Choose the destination chains:'),
+        choices: wormholeConfig.chains.filter(c => c !== sourceChain).map(chain => ({ name: chalk.green(chain), value: chain })),
       },
     ]);
     destinationChains = destinations;
@@ -196,22 +197,22 @@ async function getDeploymentDetails(deploymentType) {
     {
       type: 'input',
       name: 'saltInputInput',
-      message: 'Enter a Create2Deployer saltInput (number):',
-      validate: input => !isNaN(input) && input !== '' || 'Please enter a valid number',
+      message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
+      validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
     },
   ]);
 
-  log(`Type of saltInputInput: ${typeof saltInputInput}`);
+  log(chalk.cyan(`Type of saltInputInput: ${typeof saltInputInput}`));
 
   saltInput = stringToBytes(saltInputInput, 32);
 
-  log(saltInput)
+  log(chalk.cyan(saltInput));
 
   const { hasEnvFile } = await inquirer.prompt([
     {
       type: 'confirm',
       name: 'hasEnvFile',
-      message: 'Is there a .env file present in the project directory?',
+      message: chalk.cyan('Is there a .env file present in the project directory?'),
     },
   ]);
 
@@ -219,12 +220,12 @@ async function getDeploymentDetails(deploymentType) {
     dotenv.config();
     privateKey = process.env.DEPLOYMENT_PRIVATE_KEY || process.env.PRIVATE_KEY;
     if (!privateKey) {
-      console.log('No private key found in .env file. Please enter it manually.');
+      console.log(chalk.yellow('No private key found in .env file. Please enter it manually.'));
       const { key } = await inquirer.prompt([
         {
           type: 'password',
           name: 'key',
-          message: 'Enter your private key for gas fee payment:',
+          message: chalk.cyan('Enter your private key for gas fee payment:'),
         },
       ]);
       privateKey = key;
@@ -234,7 +235,7 @@ async function getDeploymentDetails(deploymentType) {
       {
         type: 'password',
         name: 'key',
-        message: 'Enter your private key for gas fee payment:',
+        message: chalk.cyan('Enter your private key for gas fee payment:'),
       },
     ]);
     privateKey = key;
@@ -255,8 +256,8 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
     // Get deployer address and balance
     const deployerAddress = await signer.getAddress();
     const balance = await provider.getBalance(deployerAddress);
-    console.log(`Deployer address: ${deployerAddress}`);
-    console.log(`Source chain account balance: ${ethers.utils.formatEther(balance)} ${sourceChain} ETH`);
+    console.log(chalk.blue(`Deployer address: ${deployerAddress}`));
+    console.log(chalk.blue(`Source chain account balance: ${ethers.utils.formatEther(balance)} ${sourceChain} ETH`));
 
     // Setup WormholeDeployer contract
     const WormholeDeployer = new ethers.Contract(
@@ -276,27 +277,27 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
 
     // Get deployment cost
     const cost = await WormholeDeployer.getCost(targetChains);
-    console.log("Estimated cost:", ethers.utils.formatEther(cost), "ETH");
+    console.log(chalk.yellow("Estimated cost:"), chalk.green(ethers.utils.formatEther(cost)), "ETH");
 
     if (balance.lt(cost)) {
-      throw new Error("Insufficient funds for deployment");
+      throw new Error(chalk.red("Insufficient funds for deployment"));
     }
 
     // Compute deployment address
     const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, bytecode);
-    console.log("Computed deployment address:", deploymentAddress);
+    console.log(chalk.blue("Computed deployment address:"), chalk.green(deploymentAddress));
 
     // Confirm deployment
     const { confirm } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirm',
-        message: 'Do you want to proceed with the deployment?',
+        message: chalk.cyan('Do you want to proceed with the deployment?'),
       },
     ]);
 
     if (!confirm) {
-      console.log("Deployment cancelled.");
+      console.log(chalk.yellow("Deployment cancelled."));
       return;
     }
 
@@ -311,25 +312,25 @@ async function deployContract(contract, jsonFile, deploymentDetails) {
       { value: cost.mul(2) } // Send twice the estimated cost to ensure enough funds
     );
 
-    console.log("Transaction sent.");
+    console.log(chalk.yellow("Transaction sent."));
     const spinner = ora({
-      text: "Waiting for transaction confirmation...",
+      text: chalk.yellow("Waiting for transaction confirmation..."),
       spinner: cliSpinners.circle,
     }).start();
     const receipt = await tx.wait();
-    spinner.succeed('Transaction confirmed');
-    console.log(`Deployment successful. Checkout on wormholescan...`);
-    console.log(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=MAINNET`);
+    spinner.succeed(chalk.green('Transaction confirmed'));
+    console.log(chalk.green(`Deployment successful. Checkout on wormholescan...`));
+    console.log(chalk.blue(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=MAINNET`));
   } catch (error) {
-    console.error('Deployment failed:', error);
+    console.error(chalk.red('Deployment failed:'), error);
     if (error.transaction) {
-      console.error('Transaction details:', error.transaction);
+      console.error(chalk.red('Transaction details:'), error.transaction);
     }
   }
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error(chalk.red(error));
   process.exit(1);
 });
 
