@@ -20,6 +20,25 @@
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -75,11 +94,6 @@
           "type": "uint16[]"
         },
         {
-          "internalType": "address",
-          "name": "targetAddress",
-          "type": "address"
-        },
-        {
           "internalType": "bytes",
           "name": "bytecode",
           "type": "bytes"
@@ -91,13 +105,8 @@
         },
         {
           "internalType": "bool",
-          "name": "initializable",
+          "name": "deployOnCurrentChain",
           "type": "bool"
-        },
-        {
-          "internalType": "bytes",
-          "name": "initializeData",
-          "type": "bytes"
         }
       ],
       "name": "deployAcrossChains",
@@ -115,16 +124,6 @@
         {
           "internalType": "bytes",
           "name": "bytecode",
-          "type": "bytes"
-        },
-        {
-          "internalType": "bool",
-          "name": "initializable",
-          "type": "bool"
-        },
-        {
-          "internalType": "bytes",
-          "name": "initializeData",
           "type": "bytes"
         }
       ],
@@ -164,11 +163,29 @@
           "internalType": "address",
           "name": "_wormholeRelayer",
           "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_targetAddress",
+          "type": "address"
         }
       ],
       "name": "initialize",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -202,6 +219,39 @@
       "name": "receiveWormholeMessages",
       "outputs": [],
       "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "targetAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

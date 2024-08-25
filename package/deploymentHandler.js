@@ -6,7 +6,7 @@ import cliSpinners from "cli-spinners";
 import inquirer from "inquirer";
 import { getWormholeConfig, WormDeployerConfig } from "./config.js";
 
-export async function deployContract(contract, jsonFile, deploymentDetails) {
+export async function deployContract(contract, contractBytecode, deploymentDetails) {
   const { sourceChain, destinationChains, saltInput, privateKey } = deploymentDetails;
   const wormholeConfig = getWormholeConfig();
   
@@ -24,10 +24,6 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
       WormDeployerConfig.abi,
       signer
     );
-
-    const parsedJson = JSON.parse(jsonFile);
-    const bytecodeString = parsedJson.bytecode;
-    let bytecode = ethers.utils.arrayify(bytecodeString.object);
 
     const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
     const targetAddress = WormDeployerConfig.address;
@@ -89,19 +85,17 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
     const initializable = false; // Assuming the contract is not initializable
     if (!initializable) {
       // Append constructor args to bytecode
-      bytecode = ethers.utils.concat([bytecode, constructorArgs]);
+      contractBytecode = ethers.utils.concat([contractBytecode, constructorArgs]);
     }
 
-    const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, bytecode);
+    const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, contractBytecode);
     console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
 
     const tx = await WormholeDeployer.deployAcrossChains(
       targetChains,
-      targetAddress,
-      bytecode,
+      contractBytecode,
       saltInput,
-      initializable,
-      constructorArgs,
+      true,
       { value: cost.mul(2) }
     );
 

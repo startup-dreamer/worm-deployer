@@ -18,7 +18,7 @@ async function main() {
     await compileContract(projectType);
 
     // Get contract metadata
-    const { contract, jsonFile } = await getContractMetadata(projectType, contractPath);
+    const { contract, contractBytecode } = await getContractMetadata(projectType, contractPath);
 
     // Determine deployment type
     const deploymentType = await determineDeploymentType();
@@ -27,7 +27,7 @@ async function main() {
     const deploymentDetails = await getDeploymentDetails(deploymentType);
 
     // Deploy contract
-    await deployContract(contract, jsonFile, deploymentDetails);
+    await deployContract(contract, contractBytecode, deploymentDetails);
   } catch (error) {
     console.error(chalk.red('Error in main execution:'), error);
     process.exit(1);

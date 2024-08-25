@@ -5,6 +5,7 @@ import inquirer from "inquirer";
 import chalk from 'chalk';
 import ora from "ora";
 import cliSpinners from "cli-spinners";
+import { ethers } from "ethers";
 import { exec } from "child_process";
 import getFiles from "./files.js";
 
@@ -63,19 +64,26 @@ export async function compileContract(projectType) {
 
 export async function getContractMetadata(projectType, contractPath) {
   const contract = fs.readFileSync(contractPath, 'utf-8');
-  let jsonFile;
+  let contractBytecode;
 
   if (projectType === 'hardhat') {
     const artifactsDir = path.join(process.cwd(), 'artifacts', 'contracts');
     const contractName = path.basename(contractPath, '.sol');
-    const jsonFilePath = path.join(artifactsDir, `${contractName}.json`);
-    jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
+    const jsonFilePath = path.join(artifactsDir, `${contractName}.sol`, `${contractName}.json`);
+    const jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
+    const parsedJson = JSON.parse(jsonFile);
+    const bytecodeString = parsedJson.bytecode;
+    contractBytecode = ethers.utils.arrayify(bytecodeString);
   } else {
     const outDir = path.join(process.cwd(), 'out');
     const contractName = path.basename(contractPath, '.sol');
     const jsonFilePath = path.join(outDir, `${contractName}.sol`, `${contractName}.json`);
-    jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
+    const jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
+    const parsedJson = JSON.parse(jsonFile);
+    const bytecodeString = parsedJson.bytecode;
+    contractBytecode = ethers.utils.arrayify(bytecodeString.object);
   }
 
-  return { contract, jsonFile };
+
+  return { contract, contractBytecode };
 }
