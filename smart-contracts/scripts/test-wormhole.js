@@ -30,11 +30,9 @@ async function main() {
 
     const tx = await wormholeDeployer.deployAcrossChains(
       targetChains,
-      tergetAddress,
       bytecode,
       salt,
-      initializable,
-      initializeData,
+      true,
       { value: cost.mul(2) } // Send twice the estimated cost to ensure enough funds
     );
 

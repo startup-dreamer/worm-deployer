@@ -4,15 +4,13 @@ pragma solidity ^0.8.13;
 import {IWormholeRelayer} from "wormhole-solidity-sdk/interfaces/IWormholeRelayer.sol";
 import {IWormholeReceiver} from "wormhole-solidity-sdk/interfaces/IWormholeReceiver.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IInitializable {
-    function initialize(bytes memory data) external;
-}
-
-contract WormholeDeployer is IWormholeReceiver {
+contract WormholeDeployer is IWormholeReceiver, Ownable {
     uint256 constant GAS_LIMIT = 3_000_000; // Increased from 50,000
 
     IWormholeRelayer public wormholeRelayer;
+    address public targetAddress;
 
     event ContractDeployed(address deployedAddress, bytes32 salt);
 
@@ -21,21 +19,17 @@ contract WormholeDeployer is IWormholeReceiver {
      * @param targetChains The array of target chain IDs
      * @param bytecode The bytecode of the contract to deploy
      * @param salt The salt used in the CREATE2 deployment
-     * @param initializable Whether the contract is initializable
-     * @param initializeData The data used to initialize the contract if it's initializable
      */
     function deployAcrossChains(
         uint16[] memory targetChains,
-        address targetAddress,
         bytes memory bytecode,
         bytes32 salt,
-        bool initializable,
-        bytes memory initializeData
+        bool deployOnCurrentChain
     ) external payable {
         address expectedAddress = computeAddress(salt, bytecode);
 
         for (uint256 i = 0; i < targetChains.length; i++) {
-            bytes memory payload = abi.encode(bytecode, salt, initializable, initializeData);
+            bytes memory payload = abi.encode(bytecode, salt);
 
             (uint256 cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChains[i], 0, GAS_LIMIT);
 
@@ -51,9 +45,11 @@ contract WormholeDeployer is IWormholeReceiver {
         }
 
         // Deploy on the current chain
-        address deployedAddress = deployContract(salt, bytecode, initializable, initializeData);
-        require(deployedAddress == expectedAddress, "Deployment address mismatch");
-        emit ContractDeployed(deployedAddress, salt);
+        if (deployOnCurrentChain) {
+            address deployedAddress = deployContract(salt, bytecode);
+            require(deployedAddress == expectedAddress, "Deployment address mismatch");
+            emit ContractDeployed(deployedAddress, salt);
+        }
     }
     /**
      * @dev Receives and processes Wormhole messages
@@ -61,9 +57,9 @@ contract WormholeDeployer is IWormholeReceiver {
      */
 
     function receiveWormholeMessages(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32) public payable {
-        (bytes memory bytecode, bytes32 salt, bool initializable, bytes memory initializeData) =
-            abi.decode(payload, (bytes, bytes32, bool, bytes));
-        address deployedAddress = deployContract(salt, bytecode, initializable, initializeData);
+        (bytes memory bytecode, bytes32 salt) =
+            abi.decode(payload, (bytes, bytes32));
+        address deployedAddress = deployContract(salt, bytecode);
         address expectedAddress = computeAddress(salt, bytecode);
         require(deployedAddress == expectedAddress, "Deployment address mismatch");
         emit ContractDeployed(deployedAddress, salt);
@@ -73,11 +69,9 @@ contract WormholeDeployer is IWormholeReceiver {
      * @dev Deploys and initializes a contract
      * @param salt The salt used to generate the address
      * @param bytecode The bytecode of the contract
-     * @param initializable Whether the contract is initializable
-     * @param initializeData The data used to initialize the contract
      * @return The address of the deployed contract
      */
-    function deployContract(bytes32 salt, bytes memory bytecode, bool initializable, bytes memory initializeData)
+    function deployContract(bytes32 salt, bytes memory bytecode)
         public
         returns (address)
     {
@@ -89,11 +83,6 @@ contract WormholeDeployer is IWormholeReceiver {
             revert(string(abi.encodePacked("Deployment failed: ", reason)));
         } catch (bytes memory lowLevelData) {
             revert(string(abi.encodePacked("Deployment failed with low-level error: ", toHexString(lowLevelData))));
-        }
-
-        if (initializable) {
-            (bool success,) = deployedAddress.call(initializeData);
-            require(success, "initialize failed");
         }
 
         return deployedAddress;
@@ -153,9 +142,11 @@ contract WormholeDeployer is IWormholeReceiver {
     /**
      * @dev Initialize the WormholeRelayer
      * @param _wormholeRelayer The address of the WormholeRelayer
+     * @param _targetAddress The address of the target contract
      */
-    function initialize(address _wormholeRelayer) external {
+    function initialize(address _wormholeRelayer, address _targetAddress) external {
         wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
+        targetAddress = _targetAddress;
     }
 
     receive() external payable {}

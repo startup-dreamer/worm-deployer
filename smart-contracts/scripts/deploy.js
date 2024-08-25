@@ -1,5 +1,6 @@
 const hre = require("hardhat");
 const { ethers } = require("ethers");
+const { bytecode: WormholeDeployerBytecode } = require("../contract-artifacts/WormholeDeployer.json")
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
@@ -9,16 +10,13 @@ async function main() {
   // Use the same Create2Deployer address across all chains
   const CREATE2_DEPLOYER_ADDRESS = "0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2";
   const Create2Deployer = await hre.ethers.getContractFactory("Create2Deployer");
-  const WormholeDeployer = await hre.ethers.getContractFactory("WormholeDeployer");
   const create2Deployer = await Create2Deployer.attach(CREATE2_DEPLOYER_ADDRESS);
 
-  // Use a consistent salt across all deployments
   const salt = ethers.utils.id("WormholeDeployer_v1");
 
-  // Check if the contract is already deployed
-  const tx = await create2Deployer.deploy(0, salt, WormholeDeployer.bytecode);
+  const tx = await create2Deployer.deploy(0, salt, WormholeDeployerBytecode);
   await tx.wait();
-  const bytecodehash = hre.ethers.utils.keccak256(WormholeDeployer.bytecode);
+  const bytecodehash = hre.ethers.utils.keccak256(WormholeDeployerBytecode);
   const address = await create2Deployer.computeAddress(salt, bytecodehash);
   console.log("wormholeDeployer address: ", address);
 }

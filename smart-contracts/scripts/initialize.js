@@ -25,7 +25,7 @@ async function main() {
     bscTestnet: "0x80aC94316391752A193C1c47E27D382b507c93F3"
   };
 
-  const wormholeDeployerAddress = "0x322973d1f6974237E8fC20aF5ffc57AE8A45dc35";
+  const wormholeDeployerAddress = "0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9";
   const wormholeRelayerAddress = wormholeRelayerAddresses[networkName];
 
   if (!wormholeDeployerAddress || !wormholeRelayerAddress) {
@@ -34,12 +34,14 @@ async function main() {
 
   const WormholeDeployer = await hre.ethers.getContractFactory("WormholeDeployer");
   const wormholeDeployer = await WormholeDeployer.attach(wormholeDeployerAddress);
-  await wormholeDeployer.initialize(wormholeRelayerAddress);
+  await wormholeDeployer.initialize(wormholeRelayerAddress, wormholeDeployerAddress);
 
   console.log("Initialization complete");
   console.log("WormholeDeployer address:", wormholeDeployerAddress);
   const relayer = await wormholeDeployer.wormholeRelayer();
   console.log("relayer:", relayer);
+  const wormDeployer = await wormholeDeployer.targetAddress();
+  console.log("wormDeployer:", wormDeployer);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
