@@ -26,7 +26,7 @@ contract WormholeDeployer is IWormholeReceiver {
      */
     function deployAcrossChains(
         uint16[] memory targetChains,
-        address[] memory targetAddresses,
+        address targetAddress,
         bytes memory bytecode,
         bytes32 salt,
         bool initializable,
@@ -42,7 +42,7 @@ contract WormholeDeployer is IWormholeReceiver {
             require(msg.value >= cost, "Insufficient funds for deployment");
 
             try wormholeRelayer.sendPayloadToEvm{value: cost}(
-                targetChains[i], targetAddresses[i], payload, 0, GAS_LIMIT
+                targetChains[i], targetAddress, payload, 0, GAS_LIMIT
             ) {
                 // Success
             } catch Error(string memory reason) {

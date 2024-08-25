@@ -28,6 +28,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
+      // evmVersion: "cancun",
     },
   },
   networks: {
@@ -149,9 +150,9 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      moonbaseAlpha: '3TP7W79X9VMK5AN31BK357Y1DREKVBRYAW', // Moonbeam Moonscan API Key
-      baseSepolia: 'D7R63XBGXSNRYKP5GEN8R99D7AJ478CBVD', // Base Sepolia Etherscan API Key
-      arbitrumSepolia: '18KD2QRNQ76GIRIH4MMNJ7ENC4K5MATS4N', // Arbitrum Sepolia Etherscan API Key
+      // moonbaseAlpha: '', // Moonbeam Moonscan API Key
+      // baseSepolia: '', // Base Sepolia Etherscan API Key
+      // arbitrumSepolia: '', // Arbitrum Sepolia Etherscan API Key
     },
   },
 };
