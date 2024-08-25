@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
-import { determineProjectType } from "./projectType.js";
-import { getContractPath, compileContract, getContractMetadata } from "./contractUtils.js";
-import { determineDeploymentType, getDeploymentDetails } from "./deploymentUtils.js";
-import { deployContract } from "./deploymentHandler.js";
+import { determineProjectType } from "./src/projectType.js";
+import { getContractPath, compileContract, getContractMetadata } from "./src/contractUtils.js";
+import { determineDeploymentType, getDeploymentDetails } from "./src/deploymentUtils.js";
+import { deployContract } from "./src/deploymentHandler.js";
 
 async function main() {
   try {

@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import ora from "ora";
 import cliSpinners from "cli-spinners";
 import dotenv from 'dotenv';
-import { getWormholeConfig } from "./config.js";
+import { getWormholeConfig } from "../config.js";
 import { stringToBytes } from "./utils.js";
 
 export async function determineDeploymentType() {

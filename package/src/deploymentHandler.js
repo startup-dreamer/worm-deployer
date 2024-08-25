@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import ora from "ora";
 import cliSpinners from "cli-spinners";
 import inquirer from "inquirer";
-import { getWormholeConfig, WormDeployerConfig } from "./config.js";
+import { getWormholeConfig, WormDeployerConfig } from "../config.js";
 
 export async function deployContract(contract, contractBytecode, deploymentDetails) {
   const { sourceChain, destinationChains, saltInput, privateKey } = deploymentDetails;
