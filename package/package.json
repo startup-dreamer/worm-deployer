@@ -31,11 +31,8 @@
     "inquirer": "^8.2.5",
     "ora": "^7.0.1",
     "solc": "0.8.18",
-    "web3.storage": "^4.5.5"
+    "ethers": "5.7.2"
   },
   "homepage": "https://github.com/startup-dreamer/worm-deployer#readme",
-  "shell": "/bin/bash",
-  "devDependencies": {
-    "ethers": "5.7.2"
-  }
+  "shell": "/bin/bash"
 }
