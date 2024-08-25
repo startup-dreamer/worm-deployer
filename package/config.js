@@ -26,7 +26,7 @@ export function getWormholeConfig() {
 
 export const WormDeployerConfig = {
   abi: WormholeDeployer.abi,
-  address: '0x688cd4dFa6fDa19BB6043055E13345C70c7E1eE5'
+  address: '0x322973d1f6974237E8fC20aF5ffc57AE8A45dc35'
 }
 
 export const Create2DeployerConfig = {

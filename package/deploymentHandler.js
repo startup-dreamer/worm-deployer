@@ -27,10 +27,10 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
 
     const parsedJson = JSON.parse(jsonFile);
     const bytecodeString = parsedJson.bytecode;
-    const bytecode = ethers.utils.arrayify(bytecodeString.object);
+    let bytecode = ethers.utils.arrayify(bytecodeString.object);
 
     const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
-    const targetAddresses = targetChains.map(() => "0x0000000000000000000000000000000000000000");
+    const targetAddress = WormDeployerConfig.address;
 
     const cost = await WormholeDeployer.getCost(targetChains);
     console.log(chalk.yellow("Estimated cost:"), chalk.red(ethers.utils.formatEther(cost)), chalk.red("ETH"));
@@ -39,9 +39,6 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
       throw new Error(chalk.red("Insufficient funds for deployment"));
     }
 
-    const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, bytecode);
-    console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
-
     const { hasConstructorArgs } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -49,19 +46,31 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
         message: chalk.cyan('Does the contract have constructor arguments?'),
       },
     ]);
-
+  
     let constructorArgs = "0x";
     if (hasConstructorArgs) {
-      const { args } = await inquirer.prompt([
+      const { argTypes, argValues } = await inquirer.prompt([
         {
           type: 'input',
-          name: 'args',
-          message: chalk.cyan('Enter constructor arguments (space-separated):'),
+          name: 'argTypes',
+          message: chalk.cyan('Enter constructor argument types (space-separated, e.g., string uint256 address):'),
+        },
+        {
+          type: 'input',
+          name: 'argValues',
+          message: chalk.cyan('Enter constructor argument values (space-separated):'),
         },
       ]);
-      const argArray = args.split(' ');
+  
+      const types = argTypes.split(' ');
+      const values = argValues.split(' ');
+  
+      if (types.length !== values.length) {
+        throw new Error('Number of types does not match number of values');
+      }
+  
       const abiCoder = new ethers.utils.AbiCoder();
-      constructorArgs = abiCoder.encode(argArray.map(() => 'string'), argArray);
+      constructorArgs = abiCoder.encode(types, values);
     }
 
     const { confirm } = await inquirer.prompt([
@@ -77,12 +86,21 @@ export async function deployContract(contract, jsonFile, deploymentDetails) {
       return;
     }
 
+    const initializable = false; // Assuming the contract is not initializable
+    if (!initializable) {
+      // Append constructor args to bytecode
+      bytecode = ethers.utils.concat([bytecode, constructorArgs]);
+    }
+
+    const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, bytecode);
+    console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
+
     const tx = await WormholeDeployer.deployAcrossChains(
       targetChains,
-      targetAddresses,
+      targetAddress,
       bytecode,
       saltInput,
-      false,
+      initializable,
       constructorArgs,
       { value: cost.mul(2) }
     );
