@@ -5,7 +5,6 @@ import ora from "ora";
 import cliSpinners from "cli-spinners";
 import dotenv from 'dotenv';
 import { getWormholeConfig } from "../config.js";
-import { stringToBytes } from "./utils.js";
 
 export async function determineDeploymentType() {
   const { deploymentType } = await inquirer.prompt([
@@ -24,7 +23,7 @@ export async function determineDeploymentType() {
 
 export async function getDeploymentDetails(deploymentType) {
   const wormholeConfig = getWormholeConfig();
-  let sourceChain, destinationChains, saltInput, privateKey;
+  let sourceChain, destinationChains, privateKey, deployOnSourceChain;
 
   if (deploymentType === 'single') {
     const { chain } = await inquirer.prompt([
@@ -36,6 +35,7 @@ export async function getDeploymentDetails(deploymentType) {
       },
     ]);
     sourceChain = chain;
+    deployOnSourceChain = true;
   } else {
     const { chain } = await inquirer.prompt([
       {
@@ -56,6 +56,16 @@ export async function getDeploymentDetails(deploymentType) {
       },
     ]);
     destinationChains = destinations;
+
+    const { deploySource } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'deploySource',
+        message: chalk.cyan('Do you want to deploy on the source chain as well?'),
+        default: false,
+      },
+    ]);
+    deployOnSourceChain = deploySource;
   }
 
   const { hasEnvFile } = await inquirer.prompt([
@@ -99,16 +109,5 @@ export async function getDeploymentDetails(deploymentType) {
     privateKey = key;
   }
 
-  const { saltInputInput } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'saltInputInput',
-      message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
-      validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
-    },
-  ]);
-
-  saltInput = stringToBytes(saltInputInput, 32);
-
-  return { sourceChain, destinationChains, saltInput, privateKey };
+  return { sourceChain, destinationChains, privateKey, deployOnSourceChain };
 }

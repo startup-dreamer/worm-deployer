@@ -5,17 +5,26 @@ import ora from "ora";
 import cliSpinners from "cli-spinners";
 import inquirer from "inquirer";
 import { getWormholeConfig, WormDeployerConfig } from "../config.js";
+import { stringToBytes } from "./utils.js";
 
 export async function deployContract(contract, contractBytecode, deploymentDetails) {
-  const { sourceChain, destinationChains, saltInput, privateKey } = deploymentDetails;
+  const { sourceChain, destinationChains, privateKey, deployOnSourceChain } = deploymentDetails;
   const wormholeConfig = getWormholeConfig();
   
   try {
     const provider = new ethers.providers.JsonRpcProvider(wormholeConfig.getRpcUrl(sourceChain));
     const signer = new ethers.Wallet(privateKey, provider);
+    
+    let spinner = ora({
+      text: chalk.yellow("Initializing deployment..."),
+      spinner: cliSpinners.arc,
+    }).start();
 
     const deployerAddress = await signer.getAddress();
     const balance = await provider.getBalance(deployerAddress);
+    
+    spinner.stop();
+    
     console.log(chalk.blue(`Deployer address: ${deployerAddress}`));
     console.log(chalk.blue(`Source chain account balance: ${ethers.utils.formatEther(balance)} ${sourceChain} ETH`));
 
@@ -26,14 +35,29 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
     );
 
     const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
-    const targetAddress = WormDeployerConfig.address;
 
+    spinner.text = chalk.yellow("Calculating deployment cost...");
+    spinner.start();
+    
     const cost = await WormholeDeployer.getCost(targetChains);
+    
+    spinner.succeed(chalk.green("Deployment cost calculated"));
     console.log(chalk.yellow("Estimated cost:"), chalk.red(ethers.utils.formatEther(cost)), chalk.red("ETH"));
 
     if (balance.lt(cost)) {
       throw new Error(chalk.red("Insufficient funds for deployment"));
     }
+
+    const { saltInputInput } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'saltInputInput',
+        message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
+        validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
+      },
+    ]);
+  
+    const saltInput = stringToBytes(saltInputInput, 32);
 
     const { hasConstructorArgs } = await inquirer.prompt([
       {
@@ -88,27 +112,36 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
       contractBytecode = ethers.utils.concat([contractBytecode, constructorArgs]);
     }
 
+    spinner = ora({
+      text: chalk.yellow("Computing deployment address..."),
+      spinner: cliSpinners.arc,
+    }).start();
+
     const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, contractBytecode);
+    spinner.succeed(chalk.green('Deployment address computed'));
     console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
+
+    spinner.text = chalk.yellow("Deploying contract...");
+    spinner.start();
 
     const tx = await WormholeDeployer.deployAcrossChains(
       targetChains,
       contractBytecode,
       saltInput,
-      true,
+      deployOnSourceChain,
       { value: cost.mul(2) }
     );
 
-    console.log(chalk.yellow("Transaction sent."));
-    const spinner = ora({
-      text: chalk.yellow("Waiting for transaction confirmation..."),
-      spinner: cliSpinners.circle,
-    }).start();
+    spinner.text = chalk.yellow("Waiting for transaction confirmation...");
     const receipt = await tx.wait();
-    spinner.succeed(chalk.green('Transaction confirmed'));
+    spinner.succeed(chalk.green('Deployment successful'));
+
     console.log(chalk.green(`Deployment successful. Checkout on wormholescan...`));
-    console.log(chalk.blue(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=MAINNET`));
+    console.log(chalk.blue(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=TESTNET`));
   } catch (error) {
+    if (spinner) {
+      spinner.fail(chalk.red('Deployment failed'));
+    }
     console.error(chalk.red('Deployment failed:'), error);
     if (error.transaction) {
       console.error(chalk.red('Transaction details:'), error.transaction);
