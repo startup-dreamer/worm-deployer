@@ -6,6 +6,12 @@ import {IWormholeReceiver} from "wormhole-solidity-sdk/interfaces/IWormholeRecei
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title WormholeDeployer
+ * @author Krieger (prsumit35@gmail.com)
+ * @notice This contract is used to deploy contracts across multiple chains using wormhole message passing.
+ */
+
 contract WormholeDeployer is IWormholeReceiver, Ownable {
     uint256 constant GAS_LIMIT = 3_000_000; // Increased from 50,000
 
@@ -51,11 +57,11 @@ contract WormholeDeployer is IWormholeReceiver, Ownable {
             emit ContractDeployed(deployedAddress, salt);
         }
     }
+
     /**
      * @dev Receives and processes Wormhole messages
      * @param payload The payload received from Wormhole
      */
-
     function receiveWormholeMessages(bytes memory payload, bytes[] memory, bytes32, uint16, bytes32) public payable {
         (bytes memory bytecode, bytes32 salt) =
             abi.decode(payload, (bytes, bytes32));
