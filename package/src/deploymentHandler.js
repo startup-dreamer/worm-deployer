@@ -14,8 +14,8 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
   try {
     const provider = new ethers.providers.JsonRpcProvider(wormholeConfig.getRpcUrl(sourceChain));
     const signer = new ethers.Wallet(privateKey, provider);
-    
-    let spinner = ora({
+
+    var spinner = ora({
       text: chalk.yellow("Initializing deployment..."),
       spinner: cliSpinners.arc,
     }).start();
@@ -36,8 +36,10 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
 
     const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
 
-    spinner.text = chalk.yellow("Calculating deployment cost...");
-    spinner.start();
+    var spinner = ora({
+      text: chalk.yellow("Calculating deployment cost..."),
+      spinner: cliSpinners.arc,
+    }).start();
     
     const cost = await WormholeDeployer.getCost(targetChains);
     
@@ -112,7 +114,7 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
       contractBytecode = ethers.utils.concat([contractBytecode, constructorArgs]);
     }
 
-    spinner = ora({
+    var spinner = ora({
       text: chalk.yellow("Computing deployment address..."),
       spinner: cliSpinners.arc,
     }).start();
@@ -121,8 +123,10 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
     spinner.succeed(chalk.green('Deployment address computed'));
     console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
 
-    spinner.text = chalk.yellow("Deploying contract...");
-    spinner.start();
+    var spinner = ora({
+      text: chalk.yellow("Deploying contract..."),
+      spinner: cliSpinners.arc,
+    }).start();
 
     const tx = await WormholeDeployer.deployAcrossChains(
       targetChains,

@@ -144,7 +144,7 @@ contract WormholeDeployer is IWormholeReceiver, Ownable {
      * @param _wormholeRelayer The address of the WormholeRelayer
      * @param _targetAddress The address of the target contract
      */
-    function initialize(address _wormholeRelayer, address _targetAddress) external {
+    function initialize(address _wormholeRelayer, address _targetAddress) public onlyOwner {
         wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
         targetAddress = _targetAddress;
     }
