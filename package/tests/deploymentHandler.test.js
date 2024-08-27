@@ -3,15 +3,15 @@ import { ethers } from 'ethers';
 import inquirer from 'inquirer';
 import ora from 'ora';
 import { getWormholeConfig } from '../config.js';
-import { stringToBytes } from './utils.js';
-import { deployContract } from './deploymentHandler.js';
+import { stringToBytes } from '../src/utils.js';
+import { deployContract } from '../src/deploymentHandler.js';
 
 // Mock dependencies
 jest.mock('ethers');
 jest.mock('inquirer');
 jest.mock('ora');
 jest.mock('../config.js');
-jest.mock('./utils.js');
+jest.mock('../src/utils.js');
 
 describe('deployContract', () => {
   let mockProvider;
@@ -33,7 +33,6 @@ describe('deployContract', () => {
     ethers.providers.JsonRpcProvider.mockReturnValue(mockProvider);
     ethers.Wallet.mockReturnValue(mockSigner);
 
-    // Mock WormholeDeployer contract
     mockContract = {
       getCost: jest.fn().mockResolvedValue(ethers.utils.parseEther('1')),
       computeAddress: jest.fn().mockResolvedValue('0x9876543210987654321098765432109876543210'),
@@ -43,7 +42,6 @@ describe('deployContract', () => {
     };
     ethers.Contract.mockReturnValue(mockContract);
 
-    // Mock ora spinner
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
       stop: jest.fn().mockReturnThis(),
@@ -52,16 +50,13 @@ describe('deployContract', () => {
     };
     ora.mockReturnValue(mockSpinner);
 
-    // Mock getWormholeConfig
     getWormholeConfig.mockReturnValue({
       getRpcUrl: jest.fn().mockReturnValue('https://mock-rpc-url.com'),
       chainToChainId: jest.fn().mockReturnValue(1),
     });
 
-    // Mock stringToBytes
     stringToBytes.mockReturnValue('0x1234567890');
 
-    // Mock inquirer prompts
     inquirer.prompt.mockResolvedValueOnce({ saltInputInput: '123' })
       .mockResolvedValueOnce({ hasConstructorArgs: false })
       .mockResolvedValueOnce({ confirm: true });

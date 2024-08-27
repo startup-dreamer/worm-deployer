@@ -4,14 +4,14 @@ import inquirer from 'inquirer';
 import { exec } from 'child_process';
 import { ethers } from 'ethers';
 import { getContractPath, compileContract, getContractMetadata } from './contractUtils';
-import getFiles from './files';
+import getFiles from '../src/files.js';
 
 jest.mock('fs');
 jest.mock('path');
 jest.mock('inquirer');
 jest.mock('child_process');
 jest.mock('ethers');
-jest.mock('./files');
+jest.mock('../src/files');
 
 describe('contractUtils', () => {
   beforeEach(() => {

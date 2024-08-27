@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import inquirer from 'inquirer';
-import { determineDeploymentType, getDeploymentDetails } from '../package/src/deploymentUtils.js';
+import { determineDeploymentType, getDeploymentDetails } from '../src/deploymentUtils.js';
 
 jest.mock('inquirer');
 
