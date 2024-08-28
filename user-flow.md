@@ -1,33 +1,36 @@
+# User Flow
+
 ```mermaid
 flowchart TD
-    A[Start] --> B[Run npx worm-deployer]
-    B --> C{Detect Project Type}
-    C -->|hardhat.config.ts/js| D[Hardhat]
-    C -->|foundry.toml| E[Foundry]
-    C -->|Both| F{Prompt user to choose}
-    F --> D
-    F --> E
-    D --> |Run npx hardhat compile| I[Select deployment type]
-    E --> |Run npx hardhat compile| I[Select deployment type]
-    I -->|Single Chain| J[Choose deployment chain]
-    I -->|Multi Chain| K[Choose source chain]
-    K --> L[Choose destination chains]
-    L --> M[Deploy on source chain?]
-    J --> N[Check for .env file]
-    M --> N
-    N -->|.env present| O{Check for DEPLOYMENT_PRIVATE_KEY or PRIVATE_KEY variable}
-    O -->|Key found| P[Load private key]
-    O -->|Key not found| Q[Prompt for private key]
-    N -->|.env abscent| Q
-    P --> R[Display deployer address and balance]
-    Q --> R
-    R --> S[Calculate and display deployment cost]
-    S --> T[Enter Create2Deployer salt]
-    T --> U[Prompt for constructor argument types]
-    U --> V[Prompt for constructor argument values]
-    V --> W[Confirm deployment]
-    W --> X[Display computed deployment address]
-    X --> Y[Initiate deployment]
-    Y --> Z[Display deployment status and Wormholescan link]
-    Z --> AA[End]
+    A[Start] --> B[Install worm-deployer]
+    B --> C[Run npx worm-deployer]
+    C --> D{Detect Project Type}
+    D -->|hardhat.config.ts/js| E[Hardhat]
+    D -->|foundry.toml| F[Foundry]
+    D -->|Both| G{Prompt user to choose}
+    G --> E
+    G --> F
+    E --> |Run npx hardhat compile| J[Select deployment type]
+    F --> |Run npx hardhat compile| J[Select deployment type]
+    J -->|Single Chain| K[Choose deployment chain]
+    J -->|Multi Chain| L[Choose source chain]
+    L --> M[Choose destination chains]
+    M --> N[Deploy on source chain?]
+    K --> O[Check for .env file]
+    N --> O
+    O -->|.env present| P{Check for DEPLOYMENT_PRIVATE_KEY or PRIVATE_KEY variable}
+    P -->|Key found| Q[Load private key]
+    P -->|Key not found| R[Prompt for private key]
+    O -->|.env absent| R
+    Q --> S[Display deployer address and balance]
+    R --> S
+    S --> T[Calculate and display deployment cost]
+    T --> U[Enter Create2Deployer salt]
+    U --> V[Prompt for constructor argument types]
+    V --> W[Prompt for constructor argument values]
+    W --> X[Confirm deployment]
+    X --> Y[Display computed deployment address]
+    Y --> Z[Initiate deployment]
+    Z --> AA[Display deployment status and Wormholescan link]
+    AA --> AB[End]
 ```

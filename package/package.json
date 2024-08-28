@@ -1,6 +1,6 @@
 {
   "name": "worm-deployer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A wormhole multichain deployer tool",
   "main": "app.js",
   "type": "module",

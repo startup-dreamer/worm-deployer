@@ -1,3 +1,5 @@
+# User Flow
+
 ```mermaid
 flowchart TD
     A[Start] --> B[deployAcrossChains]
@@ -16,8 +18,12 @@ flowchart TD
     N --> P[Emit ContractDeployed event]
     P --> Q{More chains?}
     Q -->|Yes| D
-    Q -->|No| R[End]
-
+    Q -->|No| S{Deploy on current chain?}
+    S -->|Yes| T[Deploy contract using CREATE2]
+    T --> U[Verify deployed address matches expected]
+    U --> V[Emit ContractDeployed event]
+    V --> R[End]
+    S -->|No| R[End]
     subgraph Wormhole Components
     H
     I
