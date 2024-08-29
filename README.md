@@ -19,5 +19,5 @@
 
 ### Supported Frameworks
 
-- <img src="./public/hardhat-logo-888739EBB4-seeklogo.com.png" alt="Hardhat" width="10" height="10"> [Hardhat](https://hardhat.org/)
-- <img src="./public/foundry-bucket.svg" alt="Foundry" width="10" height="10"> [Foundry](https://github.com/foundry-rs/foundry)
+- <img src="./public/hardhat-logo-888739EBB4-seeklogo.com.png" alt="Hardhat" width="25" height="17"> [Hardhat](https://hardhat.org/)
+- <img src="./public/foundry-aluminium-production-color-icon-vector-37432115.jpg" alt="Foundry" width="25" height="17"> [Foundry](https://github.com/foundry-rs/foundry)
