@@ -20,12 +20,15 @@
 - <img src="./public/hardhat-logo-888739EBB4-seeklogo.com.png" alt="Hardhat" width="25" height="17"> [Hardhat](https://hardhat.org/)
 - <img src="./public/foundry-bucket.svg" alt="Foundry" width="25" height="17" style="background-color: white; transform: scaleX(-1);"> [Foundry](https://github.com/foundry-rs/foundry)
 
-## Supported Chains
+## Supported Chains (Testnet only)
 
 - Ethereum Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.etherscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9)
 - Base Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.basescan.org/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
 - Optimism Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia-optimism.etherscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx) 
 - Arbitrum Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.arbiscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
+- Celo Alfajores [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://alfajores.celoscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
+- Avalanche Fuji [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://testnet.avascan.info/blockchain/all/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9/transactions/internal)
+- Binance Smart Chain Testnet [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://testnet.bscscan.com/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
 
 ## Getting Started
 

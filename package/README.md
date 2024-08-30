@@ -20,12 +20,15 @@
 - [Hardhat](https://hardhat.org/)
 - [Foundry](https://github.com/foundry-rs/foundry)
 
-## Supported Chains
+## Supported Chains (Testnet only)
 
 - Ethereum Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.etherscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9)
 - Base Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.basescan.org/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
 - Optimism Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia-optimism.etherscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx) 
 - Arbitrum Sepolia [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://sepolia.arbiscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
+- Celo Alfajores [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://alfajores.celoscan.io/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
+- Avalanche Fuji [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://testnet.avascan.info/blockchain/all/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9/transactions/internal)
+- Binance Smart Chain Testnet [`0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9`](https://testnet.bscscan.com/address/0xB6C636Fc86B4d008faEE98C0c7c493D41fa483e9#internaltx)
 
 ## Getting Started
 
@@ -73,7 +76,7 @@ worm-deployer
   <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"> Check out the demo here </a>
 </div>
 
-Test deployment contract: [https://wormholescan.io/#/tx/0x9d503c1af7cf9edbe359a2d8854d814e08bab42830f5078d39db063d2bc18f43](https://wormholescan.io/#/tx/0x9d503c1af7cf9edbe359a2d8854d814e08bab42830f5078d39db063d2bc18f43?network=TESTNET)
+Test deployment contract: [https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38](https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38?network=TESTNET)
 
 ## Worm-Deployer Architecture
 
