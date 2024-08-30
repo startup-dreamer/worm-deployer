@@ -70,7 +70,7 @@ worm-deployer
 
 ### Demo Deployment
 <div align="center">
-  <img src="./package/public/test-deployment.gif" alt="Demo Deployment" width="75%" />
+  <img src="public/test-deployment.gif" alt="Demo Deployment" width="75%" />
 </div>
 
 Test deployment contract: [https://wormholescan.io/#/tx/0x9d503c1af7cf9edbe359a2d8854d814e08bab42830f5078d39db063d2bc18f43](https://wormholescan.io/#/tx/0x9d503c1af7cf9edbe359a2d8854d814e08bab42830f5078d39db063d2bc18f43?network=TESTNET)
