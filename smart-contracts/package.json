@@ -124,6 +124,7 @@
     "initialize:alfajores": "npx hardhat run --network alfajores scripts/initialize.js",
     "initialize:basesepolia": "npx hardhat run --network baseSepolia scripts/initialize.js",
     "initialize:arbitrumsepolia": "npx hardhat run --network arbitrumSepolia scripts/initialize.js",
+    "initialize:bsctestnet": "npx hardhat run --network bscTestnet scripts/initialize.js",
     "prettier:check": "npx prettier -c \"**/*.{js,ts,md,sol,json,yml,yaml}\"",
     "prettier:fix": "npx prettier -w \"**/*.{js,ts,md,sol,json,yml,yaml}\"",
     "solhint:check": "npx solhint \"contracts/**/*.sol\"",

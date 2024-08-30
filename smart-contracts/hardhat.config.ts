@@ -92,6 +92,12 @@ const config: HardhatUserConfig = {
         ? [process.env.DEPLOYMENT_PRIVATE_KEY]
         : [],
     },
+    bscTestnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
+      accounts: process.env.DEPLOYMENT_PRIVATE_KEY
+        ? [process.env.DEPLOYMENT_PRIVATE_KEY]
+        : [],
+    },
     goerli: {
       url: `https://eth-goerli.public.blastapi.io`, // Replace with the actual URL of the goerli network
       accounts: process.env.DEPLOYMENT_PRIVATE_KEY
