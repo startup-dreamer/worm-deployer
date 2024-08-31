@@ -73,7 +73,7 @@ worm-deployer
 
 ### Demo Deployment
 <div align="center">
-  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"> Check out the demo here </a>
+  <a href="https://github.com/startup-dreamer/worm-deployer/blob/main/public/test-deployment.gif"> Check out the demo here </a>
 </div>
 
 Test deployment contract: [https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38](https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38?network=TESTNET)
