@@ -77,7 +77,7 @@ worm-deployer
   <img src="public/test-deployment.gif" alt="Demo Deployment" width="75%" />
 </div>
 
-Test deployment contract: [https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38](https://wormholescan.io/#/tx/0xb4032d06e1a5f87429ee7628543984d1d3fa9623ad0b137571c7cb42e5463d38?network=TESTNET)
+Test deployment contract: [https://wormholescan.io/#/tx/0xb94edd9a6358ae42357cb1752ce0fe3f93214c6b5618ed9cecca6b099211a6a8](https://wormholescan.io/#/tx/0xb94edd9a6358ae42357cb1752ce0fe3f93214c6b5618ed9cecca6b099211a6a8?network=TESTNET)
 
 ## Worm-Deployer Architecture
 
