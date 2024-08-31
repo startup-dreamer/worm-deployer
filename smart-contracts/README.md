@@ -1,5 +1,5 @@
 > [!WARNING]  
-> This is a proof of concept developed for the [Wormhole Hackathon](https://www.encode.club/encode-wormhole-hackathon). This is a project driven by personal interest and is currently in an experimental stage (Still people are using the deployer). Use with caution, as mainnet deployment is still under active development.
+> This is a proof of concept developed for the [Wormhole Hackathon](https://www.encode.club/encode-wormhole-hackathon). This is a project driven by personal interest and is currently in an experimental stage (Although people are using it). Use with caution, as mainnet deployment is still under active development.
 <div align="center">
   <h1>Worm-Deployer</h1>
 
@@ -157,7 +157,7 @@ Mail - prsumit35@gmail.com
 
 ## Contribution
 
-Contributions are more than welcome! Please open an issue for any bugs or feature requests and maybe submit a PR.
+Contributions are more than welcome! Please open an issue for any bugs or feature requests and maybe submit a PR as well.
 
 ## Acknowledgment
 

@@ -60,7 +60,6 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
     ]);
   
     const saltInput = stringToBytes(saltInputInput, 32);
-
     const { hasConstructorArgs } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -80,12 +79,17 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
         {
           type: 'input',
           name: 'argValues',
-          message: chalk.cyan('Enter constructor argument values (space-separated):'),
+          message: chalk.cyan('Enter constructor argument values (space-separated, use double quotes for string values):'),
         },
       ]);
   
       const types = argTypes.split(' ');
-      const values = argValues.split(' ');
+      const values = argValues.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g).map(value => {
+        if (value.startsWith('"') && value.endsWith('"')) {
+          return value.slice(1, -1); // Remove quotes for string values
+        }
+        return value;
+      });
   
       if (types.length !== values.length) {
         throw new Error('Number of types does not match number of values');

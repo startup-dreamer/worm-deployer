@@ -38,3 +38,5 @@ main().catch((error) => {
   console.error(chalk.red(error));
   process.exit(1);
 });
+
+export {determineProjectType, getContractPath, compileContract, getContractMetadata, determineDeploymentType, getDeploymentDetails, deployContract};
