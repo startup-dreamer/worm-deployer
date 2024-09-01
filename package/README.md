@@ -5,7 +5,9 @@
 
   <img alt="Worm-Deployer" src="./public/worm-deployer-1.png" width="125" />
 
-  <p><b>Worm-Deployer: A Multi-Chain Smart Contract Deployment Tool with Single-Transaction Execution and Deterministic Addressing</b></p>
+  <p><b>Worm-Deployer: A Multi-Chain Smart Contract Deployment Tool with Single-Transaction Execution and Deterministic Addressing</b><br>
+    <a href="https://youtu.be/PAkZQIKbr-c">Video Demo</a>
+    </p>
 </div>
 
 ## Features

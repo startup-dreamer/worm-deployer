@@ -3,9 +3,11 @@
 <div align="center">
   <h1>Worm-Deployer</h1>
 
-  <img alt="Worm-Deployer" src="./public/worm-deployer-1.png" width="125" />
+  <img alt="Worm-Deployer" src="../public/worm-deployer-1.png" width="125" />
 
-  <p><b>Worm-Deployer: A Multi-Chain Smart Contract Deployment Tool with Single-Transaction Execution and Deterministic Addressing</b></p>
+  <p><b>Worm-Deployer: A Multi-Chain Smart Contract Deployment Tool with Single-Transaction Execution and Deterministic Addressing</b><br>
+    <a href="https://youtu.be/PAkZQIKbr-c">Video Demo</a>
+    </p>
 </div>
 
 ## Features
@@ -17,8 +19,8 @@
 
 ## Supported Frameworks
 
-- <img src="./public/hardhat-logo-888739EBB4-seeklogo.com.png" alt="Hardhat" width="25" height="17"> [Hardhat](https://hardhat.org/)
-- <img src="./public/foundry-bucket.svg" alt="Foundry" width="25" height="17" style="background-color: white; transform: scaleX(-1);"> [Foundry](https://github.com/foundry-rs/foundry)
+- <img src="../public/hardhat-logo-888739EBB4-seeklogo.com.png" alt="Hardhat" width="25" height="17"> [Hardhat](https://hardhat.org/)
+- <img src="../public/foundry-bucket.svg" alt="Foundry" width="25" height="17" style="background-color: white; transform: scaleX(-1);"> [Foundry](https://github.com/foundry-rs/foundry)
 
 ## Supported Chains (Testnet only)
 
