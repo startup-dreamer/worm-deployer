@@ -31,7 +31,8 @@
     "ethers": "5.7.2",
     "inquirer": "^8.2.5",
     "ora": "^7.0.1",
-    "solc": "0.8.18"
+    "solc": "0.8.18",
+    "axios": "^0.21.1"
   },
   "homepage": "https://github.com/startup-dreamer/worm-deployer#readme",
   "shell": "/bin/bash",

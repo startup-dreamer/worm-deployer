@@ -1,0 +1,23 @@
+{
+  "Sepolia": {
+    "apiKey": "YOUR_ETHERSCAN_API_KEY"
+  },
+  "ArbitrumSepolia": {
+    "apiKey": "YOUR_ARBISCAN_API_KEY"
+  },
+  "BaseSepolia": {
+    "apiKey": "YOUR_BASESCAN_API_KEY"
+  },
+  "OptimismSepolia": {
+    "apiKey": "YOUR_OPTIMISM_ETHERSCAN_API_KEY"
+  },
+  "Alfajores": {
+    "apiKey": "YOUR_CELOSCAN_API_KEY"
+  },
+  "Fuji": {
+    "apiKey": "YOUR_SNOWTRACE_API_KEY"
+  },
+  "BscTestnet": {
+    "apiKey": "YOUR_BSCSCAN_API_KEY"
+  }
+}
