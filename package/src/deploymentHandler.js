@@ -1,18 +1,25 @@
 // deploymentHandler.js
 import { ethers } from "ethers";
-import chalk from 'chalk';
+import chalk from "chalk";
 import ora from "ora";
 import cliSpinners from "cli-spinners";
 import inquirer from "inquirer";
 import { getWormholeConfig, WormDeployerConfig } from "../config.js";
 import { stringToBytes } from "./utils.js";
 
-export async function deployContract(contract, contractBytecode, deploymentDetails) {
-  const { sourceChain, destinationChains, privateKey, deployOnSourceChain } = deploymentDetails;
+export async function deployContract(
+  contract,
+  contractBytecode,
+  deploymentDetails
+) {
+  const { sourceChain, destinationChains, privateKey, deployOnSourceChain } =
+    deploymentDetails;
   const wormholeConfig = getWormholeConfig();
-  
+
   try {
-    const provider = new ethers.providers.JsonRpcProvider(wormholeConfig.getRpcUrl(sourceChain));
+    const provider = new ethers.providers.JsonRpcProvider(
+      wormholeConfig.getRpcUrl(sourceChain)
+    );
     const signer = new ethers.Wallet(privateKey, provider);
 
     var spinner = ora({
@@ -22,11 +29,17 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
 
     const deployerAddress = await signer.getAddress();
     const balance = await provider.getBalance(deployerAddress);
-    
+
     spinner.stop();
-    
+
     console.log(chalk.blue(`Deployer address: ${deployerAddress}`));
-    console.log(chalk.blue(`Source chain account balance: ${ethers.utils.formatEther(balance)} ${sourceChain} ETH`));
+    console.log(
+      chalk.blue(
+        `Source chain account balance: ${ethers.utils.formatEther(
+          balance
+        )} ${sourceChain} ETH`
+      )
+    );
 
     const WormholeDeployer = new ethers.Contract(
       WormDeployerConfig.address,
@@ -34,17 +47,23 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
       signer
     );
 
-    const targetChains = destinationChains ? destinationChains.map(chain => wormholeConfig.chainToChainId(chain)) : [wormholeConfig.chainToChainId(sourceChain)];
+    const targetChains = destinationChains
+      ? destinationChains.map((chain) => wormholeConfig.chainToChainId(chain))
+      : [wormholeConfig.chainToChainId(sourceChain)];
 
     var spinner = ora({
       text: chalk.yellow("Calculating deployment cost..."),
       spinner: cliSpinners.arc,
     }).start();
-    
+
     const cost = await WormholeDeployer.getCost(targetChains);
-    
+
     spinner.succeed(chalk.green("Deployment cost calculated"));
-    console.log(chalk.yellow("Estimated cost:"), chalk.red(ethers.utils.formatEther(cost)), chalk.red("ETH"));
+    console.log(
+      chalk.yellow("Estimated cost:"),
+      chalk.red(ethers.utils.formatEther(cost)),
+      chalk.red("ETH")
+    );
 
     if (balance.lt(cost)) {
       throw new Error(chalk.red("Insufficient funds for deployment"));
@@ -52,58 +71,66 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
 
     const { saltInputInput } = await inquirer.prompt([
       {
-        type: 'input',
-        name: 'saltInputInput',
-        message: chalk.cyan('Enter a Create2Deployer saltInput (number):'),
-        validate: input => !isNaN(input) && input !== '' || chalk.red('Please enter a valid number'),
+        type: "input",
+        name: "saltInputInput",
+        message: chalk.cyan("Enter a Create2Deployer saltInput (number):"),
+        validate: (input) =>
+          (!isNaN(input) && input !== "") ||
+          chalk.red("Please enter a valid number"),
       },
     ]);
-  
+
     const saltInput = stringToBytes(saltInputInput, 32);
     const { hasConstructorArgs } = await inquirer.prompt([
       {
-        type: 'confirm',
-        name: 'hasConstructorArgs',
-        message: chalk.cyan('Does the contract have constructor arguments?'),
+        type: "confirm",
+        name: "hasConstructorArgs",
+        message: chalk.cyan("Does the contract have constructor arguments?"),
       },
     ]);
-  
+
     let constructorArgs = "0x";
     if (hasConstructorArgs) {
       const { argTypes, argValues } = await inquirer.prompt([
         {
-          type: 'input',
-          name: 'argTypes',
-          message: chalk.cyan('Enter constructor argument types (space-separated, e.g., string uint256 address):'),
+          type: "input",
+          name: "argTypes",
+          message: chalk.cyan(
+            "Enter constructor argument types (space-separated, e.g., string uint256 address):"
+          ),
         },
         {
-          type: 'input',
-          name: 'argValues',
-          message: chalk.cyan('Enter constructor argument values (space-separated, use double quotes for string values):'),
+          type: "input",
+          name: "argValues",
+          message: chalk.cyan(
+            "Enter constructor argument values (space-separated, use double quotes for string values):"
+          ),
         },
       ]);
-  
-      const types = argTypes.split(' ');
-      const values = argValues.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g).map(value => {
-        if (value.startsWith('"') && value.endsWith('"')) {
-          return value.slice(1, -1); // Remove quotes for string values
-        }
-        return value;
-      });
-  
+
+      const types = argTypes.split(" ");
+      const values = argValues
+        .match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g)
+        .map((value) => {
+          if (value.startsWith('"') && value.endsWith('"')) {
+            return value.slice(1, -1); // Remove quotes for string values
+          }
+          return value;
+        });
+
       if (types.length !== values.length) {
-        throw new Error('Number of types does not match number of values');
+        throw new Error("Number of types does not match number of values");
       }
-  
+
       const abiCoder = new ethers.utils.AbiCoder();
       constructorArgs = abiCoder.encode(types, values);
     }
 
     const { confirm } = await inquirer.prompt([
       {
-        type: 'confirm',
-        name: 'confirm',
-        message: chalk.cyan('Do you want to proceed with the deployment?'),
+        type: "confirm",
+        name: "confirm",
+        message: chalk.cyan("Do you want to proceed with the deployment?"),
       },
     ]);
 
@@ -115,7 +142,10 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
     const initializable = false; // Assuming the contract is not initializable
     if (!initializable) {
       // Append constructor args to bytecode
-      contractBytecode = ethers.utils.concat([contractBytecode, constructorArgs]);
+      contractBytecode = ethers.utils.concat([
+        contractBytecode,
+        constructorArgs,
+      ]);
     }
 
     var spinner = ora({
@@ -123,9 +153,15 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
       spinner: cliSpinners.arc,
     }).start();
 
-    const deploymentAddress = await WormholeDeployer.computeAddress(saltInput, contractBytecode);
-    spinner.succeed(chalk.green('Deployment address computed'));
-    console.log(chalk.blue("Computed deployment address:"), chalk.red(deploymentAddress));
+    const deploymentAddress = await WormholeDeployer.computeAddress(
+      saltInput,
+      contractBytecode
+    );
+    spinner.succeed(chalk.green("Deployment address computed"));
+    console.log(
+      chalk.blue("Computed deployment address:"),
+      chalk.red(deploymentAddress)
+    );
 
     var spinner = ora({
       text: chalk.yellow("Deploying contract..."),
@@ -142,17 +178,26 @@ export async function deployContract(contract, contractBytecode, deploymentDetai
 
     spinner.text = chalk.yellow("Waiting for transaction confirmation...");
     const receipt = await tx.wait();
-    spinner.succeed(chalk.green('Deployment successful'));
+    spinner.succeed(chalk.green("Deployment successful"));
 
-    console.log(chalk.green(`Deployment successful. Checkout on wormholescan...`));
-    console.log(chalk.blue(`https://wormholescan.io/#/tx/${receipt.transactionHash}?network=TESTNET`));
+    console.log(
+      chalk.green(`Deployment successful. Checkout on wormholescan...`)
+    );
+    console.log(
+      chalk.blue(
+        `https://wormholescan.io/#/tx/${receipt.transactionHash}?network=TESTNET`
+      )
+    );
+
+    return { success: true, address: deploymentAddress };
   } catch (error) {
     if (spinner) {
-      spinner.fail(chalk.red('Deployment failed'));
+      spinner.fail(chalk.red("Deployment failed"));
     }
-    console.error(chalk.red('Deployment failed:'), error);
+    console.error(chalk.red("Deployment failed:"), error);
     if (error.transaction) {
-      console.error(chalk.red('Transaction details:'), error.transaction);
+      console.error(chalk.red("Transaction details:"), error.transaction);
     }
+    return { success: false, error };
   }
 }
